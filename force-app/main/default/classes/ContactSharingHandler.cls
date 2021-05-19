@@ -6,19 +6,30 @@ public with sharing class ContactSharingHandler {
         List <ContactShare> shares = new List<ContactShare>();
         ContactShare contactShare;
         TerritoryUser__c userter;
+        Account acc;
+        TerritoryUser__c ter;
+        Set <Id> territoryIdSet = new Set <Id>();
 
-
-        for(Reference__c ref : newList) {
-            contactShare = new ContactShare ();
-            //userter = [];
-            //contactShare.UserOrGroupId =  ref.User__c;
-            //accountShare.ContactId = ref.Id;
-            //cs.ContactAccessLevel = 'Edit';
-
-            shares.add(contactShare);
+        for (Reference__c ref : newList) {
+            territoryIdSet.add(ref.Account__c);
         }
 
-        //insert shares;
+        acc = [SELECT Territory__c FROM Account WHERE Id = : territoryIdSet];
 
+        if (acc != null) {
+            ter = [SELECT User__c FROM TerritoryUser__c WHERE Territory__c = : acc.Territory__c];
+        }
+
+        if (ter != null) {
+            for(Reference__c ref : newList) {
+                contactShare = new ContactShare ();
+                contactShare.ContactId = ref.Contact__c;
+                contactShare.ContactAccessLevel = 'Edit';
+                contactShare.RowCause = 'Manual';
+                contactShare.UserOrGroupId =  ter.User__c;
+                shares.add(contactShare);
+            }   
+        } 
+        insert shares;
     }
 }

@@ -7,18 +7,23 @@ public with sharing class AccountSharingHandler {
         List<AccountShare> shareList = new List<AccountShare>();
         AccountShare accountShare;
         TerritoryUser__c userter;
+        Set<Id> territoryIdSet = new Set<Id>();
+        
 
         for(Account acc : newList) {
-            userter = [SELECT User__c FROM TerritoryUser__c WHERE Territory__c = : acc.Territory__c];
-            System.debug(userter);
+            territoryIdSet.add(acc.Territory__c);
         }
+
+        userter = [SELECT User__c FROM TerritoryUser__c WHERE Territory__c =: territoryIdSet];
 
         if (userter != null) {
             for(Account acc : newList) {
+
                 accountShare = new AccountShare();
                 accountShare.AccountId = acc.Id;
                 accountShare.UserOrGroupId = userter.User__c;
                 accountShare.AccountAccessLevel = 'edit';
+                accountShare.ContactAccessLevel = 'edit';
                 accountShare.CaseAccessLevel = 'edit';
                 accountShare.OpportunityAccessLevel = 'edit';
                 shareList.add(accountShare);
