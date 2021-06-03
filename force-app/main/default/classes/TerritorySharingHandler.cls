@@ -3,6 +3,8 @@ public with sharing class TerritorySharingHandler {
     public TerritorySharingHandler() {
     }
 
+    //todo Sharing of the territory is not needed
+    //todo need Shares on Account and Contact
     public static void insertShareTerritory(List<TerritoryUser__c> newList) {
         List <Territory__Share> shares = new List<Territory__Share>();
         Territory__Share territoryShare;
@@ -24,6 +26,7 @@ public with sharing class TerritorySharingHandler {
             terUserId = terUser.User__c;
         }
 
+        //todo The condition contains 3 levels of nesting. How can you make unlimited nesting levels?
         terId = [SELECT Id  FROM Territory__c WHERE Territory__c = : territoryIdSet];
             
         if(terId != null) {
@@ -52,13 +55,14 @@ public with sharing class TerritorySharingHandler {
             }
 
         Database.SaveResult[] lsr = Database.insert(shares, false);
-        for(Database.SaveResult sr : lsr){
+        for(Database.SaveResult sr : lsr) {
             if(!sr.isSuccess()){
                 Database.Error err = sr.getErrors()[0];
             }
         }
     }
 
+    //todo delete Share on Account and Contact
     public static void deleteShareTerritory (List<TerritoryUser__c> oldList) {
         List <Id> id = new List<Id>();
         List <Territory__c> terId;
@@ -75,11 +79,11 @@ public with sharing class TerritorySharingHandler {
         if(terId != null) {
             subTerId = [SELECT Id  FROM Territory__c WHERE Territory__c = : terId];
                 
-        }  
-          
+        }
         List<Territory__Share> shares = [SELECT ID FROM Territory__Share WHERE ParentId IN: id];
         List<Territory__Share> subShares = [SELECT ID FROM Territory__Share WHERE ParentId IN: terId];
         List<Territory__Share> nextSubShares = [SELECT ID FROM Territory__Share WHERE ParentId IN: subTerId];
+        // todo DML operation with allOrNone = false and no results processing
         Database.delete(shares, false);
         Database.delete(subShares, false);
         Database.delete(nextSubShares, false);

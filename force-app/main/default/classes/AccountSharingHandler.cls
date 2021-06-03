@@ -14,6 +14,7 @@ public with sharing class AccountSharingHandler {
             territoryIdSet.add(acc.Territory__c);
         }
 
+        //todo You need to check and share the entire hierarchy of territories
         userter = [SELECT User__c FROM TerritoryUser__c WHERE Territory__c =: territoryIdSet];
 
         if (userter != null) {
@@ -36,6 +37,7 @@ public with sharing class AccountSharingHandler {
         }
     }
 
+    // todo Check sharing for contacts
     public static void deleteAccountShare (List<Account> oldList) {
         List <Id> id = new List<Id>();
 
@@ -43,7 +45,10 @@ public with sharing class AccountSharingHandler {
             id.add(acc.Id);
         }
 
+        //todo Sharing will be removed for all users
         List<AccountShare> shares = [SELECT ID FROM AccountShare WHERE AccountId IN: id];
+
+        // todo DML operation with allOrNone = false and no results processing
         Database.delete(shares, false);
     }
 }
