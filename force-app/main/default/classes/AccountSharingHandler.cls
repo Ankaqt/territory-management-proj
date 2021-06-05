@@ -5,13 +5,18 @@ public with sharing class AccountSharingHandler {
 
     public static void insertAccountShare(List<Account> newList) {
         List<AccountShare> shareList = new List<AccountShare>();
+        List<ContactShare> conShareList = new List<ContactShare>();
         AccountShare accountShare;
+        ContactShare conShare;
+        List<Reference__c> accountReferences = new List<Reference__c>();
         TerritoryUser__c userter;
+        Set<Id> accountsIdSet = new Set<Id>();
         Set<Id> territoryIdSet = new Set<Id>();
         
 
         for(Account acc : newList) {
             territoryIdSet.add(acc.Territory__c);
+            accountsIdSet.add(acc.Id);
         }
 
         //todo You need to check and share the entire hierarchy of territories
@@ -19,7 +24,6 @@ public with sharing class AccountSharingHandler {
 
         if (userter != null) {
             for(Account acc : newList) {
-
                 accountShare = new AccountShare();
                 accountShare.AccountId = acc.Id;
                 accountShare.UserOrGroupId = userter.User__c;
