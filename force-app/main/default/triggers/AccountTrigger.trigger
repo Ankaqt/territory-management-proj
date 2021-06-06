@@ -1,15 +1,17 @@
-trigger AccountTrigger on Account (after insert) {
+trigger AccountTrigger on Account (after insert, after update) {
 
-    if(Trigger.IsInsert && Trigger.IsAfter){
-        AccountSharingHandler.insertAccountShare(Trigger.new);
+    if (Trigger.isAfter) {
+        if (Trigger.isInsert) {
+            AccountSharingHandler.insertAccountShare(Trigger.new);
+        }
+
+        // if( Trigger.IsUpdate) {
+        //     AccountSharingHandler.deleteAccountShare(Trigger.old);
+        //     AccountSharingHandler.insertAccountShare(Trigger.new);
+        // }
     }
 
-    if(Trigger.IsAfter && Trigger.IsUpdate){
-        AccountSharingHandler.deleteAccountShare(Trigger.old);
-        AccountSharingHandler.insertAccountShare(Trigger.new);
-    }
-
-    if(Trigger.IsBefore && Trigger.IsDelete){
-        AccountSharingHandler.deleteAccountShare(Trigger.old);
-    }
+    // if(Trigger.IsBefore && Trigger.IsDelete){
+    //     AccountSharingHandler.deleteAccountShare(Trigger.old);
+    // }
 }

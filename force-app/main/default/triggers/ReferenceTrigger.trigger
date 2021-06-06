@@ -1,6 +1,11 @@
-trigger ReferenceTrigger on Reference__c (after insert, after update, before delete) {
+trigger ReferenceTrigger on Reference__c (after insert, after update) {
 
-    if(Trigger.IsInsert && Trigger.IsAfter){
-       //ContactSharingHandler.insertShareContact(Trigger.new);
+    if (Trigger.isAfter) {
+        if (Trigger.isInsert) {
+            ContactSharingHandler.insertShareContact(Trigger.new);
+        }
+        if (Trigger.isDelete) {
+            
+        }
     }
 }

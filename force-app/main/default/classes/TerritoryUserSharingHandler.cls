@@ -100,8 +100,20 @@ public with sharing class TerritoryUserSharingHandler {
 
         System.debug(accId);
         System.debug(refList);
-        insert accountsShares;
-        insert contactsShares;
+
+        Database.SaveResult[] accResult = Database.insert(accountsShares, false);
+        Database.SaveResult[] conResult = Database.insert(contactsShares, false);
+        for(Database.SaveResult sr : accResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
+
+        for(Database.SaveResult sr : conResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
     }
 
     //todo delete Share on Account and Contact
@@ -123,8 +135,19 @@ public with sharing class TerritoryUserSharingHandler {
         List<Territory__Share> subShares = [SELECT ID FROM Territory__Share WHERE ParentId IN: terId];     
           
         // todo DML operation with allOrNone = false and no results processing
-        Database.delete(shares, false);
-        Database.delete(subShares, false);
+        Database.DeleteResult[] terSharesResult = Database.delete(shares, false);
+        Database.DeleteResult[] subTerSharesResult = Database.delete(subShares, false);
+        for(Database.DeleteResult sr : terSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
+
+        for(Database.DeleteResult sr : subTerSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
     }
 
     public static void deleteAccountsAndContacts(List<TerritoryUser__c> oldList) {
@@ -155,7 +178,19 @@ public with sharing class TerritoryUserSharingHandler {
 
         List<AccountShare> accShares = [SELECT ID FROM AccountShare WHERE AccountId IN: accList];
         List<ContactShare> conShares = [SELECT ID FROM ContactShare WHERE ContactId IN: conList];
-        Database.delete(accShares, false);
-        Database.delete(conShares, false);
+
+        Database.DeleteResult[] accSharesResult = Database.delete(accShares, false);
+        Database.DeleteResult[] conSharesResult = Database.delete(conShares, false);
+        for(Database.DeleteResult sr : accSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
+
+        for(Database.DeleteResult sr : conSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
     }
 }
