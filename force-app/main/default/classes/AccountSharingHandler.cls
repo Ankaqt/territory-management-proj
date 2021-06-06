@@ -5,36 +5,61 @@ public with sharing class AccountSharingHandler {
 
     public static void insertAccountShare(List<Account> newList) {
         List<AccountShare> shareList = new List<AccountShare>();
-        List<ContactShare> conShareList = new List<ContactShare>();
         AccountShare accountShare;
         ContactShare conShare;
         List<Reference__c> accountReferences = new List<Reference__c>();
-        TerritoryUser__c userter;
+        List <TerritoryUser__c> terUser;
         Set<Id> accountsIdSet = new Set<Id>();
         Set<Id> territoryIdSet = new Set<Id>();
+        Set<Id> users = new Set<Id>();
+        Account accTer;
+        Set<Territory__c> parentTerSet;
+        Id terId;
         
-
         for(Account acc : newList) {
-            territoryIdSet.add(acc.Territory__c);
             accountsIdSet.add(acc.Id);
+            terId = acc.Territory__c;
         }
 
-        //todo You need to check and share the entire hierarchy of territories
-        userter = [SELECT User__c FROM TerritoryUser__c WHERE Territory__c =: territoryIdSet];
+        parentTerSet = TerritoryUserSharingHalper.getTerritoriesHierarchy(terId);
+        for (Territory__c ter: parentTerSet) {
+            territoryIdSet.add(ter.Id);
+        }
+        System.debug(territoryIdSet);
 
-        if (userter != null) {
+        accTer = [SELECT Territory__c FROM Account WHERE Id = : accountsIdSet];
+        territoryIdSet.add(accTer.Territory__c);
+        //todo You need to check and share the entire hierarchy of territories
+        if (accTer != null) {
+            terUser = [SELECT User__c FROM TerritoryUser__c WHERE Territory__c =: territoryIdSet];
+        }
+        System.debug(terUser);
+
+        for(TerritoryUser__c terrUser: terUser) {
+            users.add(terrUser.User__c);
+        }
+
+        if (terUser != null) {
             for(Account acc : newList) {
-                accountShare = new AccountShare();
-                accountShare.AccountId = acc.Id;
-                accountShare.UserOrGroupId = userter.User__c;
-                accountShare.AccountAccessLevel = 'edit';
-                accountShare.ContactAccessLevel = 'edit';
-                accountShare.CaseAccessLevel = 'edit';
-                accountShare.OpportunityAccessLevel = 'edit';
-                shareList.add(accountShare);
+                for(Id user: users) {
+                    accountShare = new AccountShare();
+                    accountShare.AccountId = acc.Id;
+                    accountShare.UserOrGroupId = user;
+                    accountShare.AccountAccessLevel = 'edit';
+                    accountShare.ContactAccessLevel = 'edit';
+                    accountShare.CaseAccessLevel = 'edit';
+                    accountShare.OpportunityAccessLevel = 'edit';
+                    shareList.add(accountShare);
+                }
             }
 
-            insert shareList;  
+            System.debug(shareList);
+            Database.SaveResult[] lsr = Database.insert(shareList, false);
+            for(Database.SaveResult sr : lsr) {
+                if(!sr.isSuccess()) {
+                    Database.Error err = sr.getErrors()[0];
+                }
+            }  
         } else {
             //some warning
             System.debug('Inserting an Account with a territory to which the user is not assigned');   
