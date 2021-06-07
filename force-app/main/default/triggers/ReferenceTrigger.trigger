@@ -5,7 +5,7 @@ trigger ReferenceTrigger on Reference__c (after insert, after update) {
             ContactSharingHandler.insertShareContact(Trigger.new);
         }
         if (Trigger.isDelete) {
-            
+            ContactSharingHandler.deleteShareContact(Trigger.old);
         }
     }
 }

@@ -59,6 +59,20 @@ public with sharing class ContactSharingHandler {
     }
 
     public static void deleteShareContact(List<Reference__c> oldList) {
+        List<Id> conList = new List<Id>();
 
+        for(Reference__c ref: oldList) {
+            conList.add(ref.Contact__c);
+        }
+
+        List<ContactShare> conShares = [SELECT ID FROM ContactShare WHERE ContactId IN: conList];
+        System.debug(conShares);
+        Database.DeleteResult[] conSharesResult = Database.delete(conShares, false);
+
+        for(Database.DeleteResult sr : conSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
     }
 }
