@@ -67,17 +67,37 @@ public with sharing class AccountSharingHandler {
     }
 
     // todo Check sharing for contacts
-    public static void deleteAccountShare (List<Account> oldList) {
-        List <Id> id = new List<Id>();
+    public static void deleteAccountAndContactShare (List<Account> oldList) {
+        List <Id> accId = new List<Id>();
+        List<Reference__c> refList = new List<Reference__c>();
+        List<Id> conList = new List<Id>();
 
         for(Account acc : oldList) {
-            id.add(acc.Id);
+            accId.add(acc.Id);
         }
 
-        //todo Sharing will be removed for all users
-        List<AccountShare> shares = [SELECT ID FROM AccountShare WHERE AccountId IN: id];
+        refList = [SELECT Id, Contact__c FROM Reference__c WHERE Account__c IN :accId];
 
+        for(Reference__c ref: refList) {
+            conList.add(ref.Contact__c);
+        }
+        //todo Sharing will be removed for all users ????
+        List<AccountShare> accShares = [SELECT ID FROM AccountShare WHERE AccountId IN: accId];
+        List<ContactShare> conShares = [SELECT ID FROM ContactShare WHERE ContactId IN: conList];
         // todo DML operation with allOrNone = false and no results processing
-        Database.delete(shares, false);
+        Database.DeleteResult[] accSharesResult = Database.delete(accShares, false);
+        Database.DeleteResult[] conSharesResult = Database.delete(conShares, false);
+
+        for(Database.DeleteResult sr : accSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
+
+        for(Database.DeleteResult sr : conSharesResult) {
+            if(!sr.isSuccess()) {
+                Database.Error err = sr.getErrors()[0];
+            }
+        }
     }
 }
